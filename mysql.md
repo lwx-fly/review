@@ -5,31 +5,28 @@ pie
     "数据段" : 42.96
     "索引段" : 42.96
 ```
----
+
 ```mermaid
-graph LR;
-Add--写入请求-->mysql   
-mysql--prepare-->redo_log--记录逻辑二进制日志-->bin_log--commit-->redo_log
-mysql--插入一条delete数据的回滚日志-->undo_log
-undo_log-->redo_log
-bin_log--事务提交后删除-->undo_log
+pie 
+    title  undo_log类型
+    "insert" : 42.96
+    "update" : 42.96
 ```
 ---
 ```mermaid
-sequenceDiagram
-	actor event
-    participant redo_buffer
-    participant os_buffer
-    participant redo_file
- 
+graph LR;
+insert请求-->mysql   
+mysql-->redo_log写入状态为prepare-->写入bin_log-->redo_log状态更新为已提交-->删除产生的undo_log
+mysql-->写入一条delete数据的undo_log
+写入一条delete数据的undo_log-->写入redo_log
 ```
 
 ----
 ```mermaid
 graph LR;
-Delete--删除请求-->mysql   
-mysql--prepare-->redo_log--记录逻辑二进制日志-->bin_log--commit-->redo_log
-mysql--插入一条insert数据的回滚日志-->undo_log-->redo_log
+DELETE/UPDATE请求-->mysql   
+mysql-->redo_log写入状态为prepare-->写入bin_log-->redo_log状态更新为已提交-->undo_log放入链表
+mysql-->写入一条update数据的undo_log-->写入redo_log
 ```
 ---
 
